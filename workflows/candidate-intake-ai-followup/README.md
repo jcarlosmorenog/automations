@@ -6,12 +6,7 @@ A practical n8n proof artifact for staffing and recruiting teams.
 
 ## Demo
 
-<!-- Add a screenshot of the workflow canvas and/or a short walkthrough video to ./media,
-     then reference them here. Example:
-![Workflow canvas](./media/workflow-canvas.png)
-[▶ Watch the 60-second walkthrough](./media/walkthrough.mp4) -->
-
-_Screenshots and a walkthrough video live in [`./media`](./media)._
+▶ [Watch the walkthrough](./media/n8n.mp4) — a run through the workflow in n8n (opens in your browser).
 
 ## Files in this folder
 
