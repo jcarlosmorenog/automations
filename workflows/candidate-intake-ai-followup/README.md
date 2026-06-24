@@ -2,7 +2,7 @@
 
 A practical n8n proof artifact for staffing and recruiting teams.
 
-> Part of my [n8n automation portfolio](../../README.md).
+> One of my [n8n workflows for day-to-day stuff](../../README.md).
 
 ## Demo
 
@@ -35,10 +35,6 @@ This workflow automates a common recruiting operations process:
 7. Return a confirmation response.
 
 The business value is simple: less manual admin, faster response time, fewer missed candidates, and cleaner records.
-
-## Target buyer
-
-Small staffing and recruiting firms where recruiters still copy data between forms, email, spreadsheets, and ATS/CRM tools.
 
 ## Workflow nodes
 
@@ -106,11 +102,3 @@ curl -X POST "YOUR_N8N_TEST_WEBHOOK_URL" \
 - Use header authentication on the webhook before production use.
 - Avoid storing sensitive candidate data in public logs or public workflow exports.
 - Anonymize any demo data before publishing screenshots or videos.
-
-## Suggested public demo title
-
-**AI Candidate Intake Assistant for Recruiting Teams**
-
-## Suggested CTA
-
-Send me your manual recruiting workflow and I'll suggest one automation.

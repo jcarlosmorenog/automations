@@ -1,3 +1,7 @@
+# --- Local-only Claude Code files (kept private to this repo) ---
+CLAUDE.md
+.claude/
+
 # --- Secrets / credentials (never commit) ---
 .env
 .env.*
