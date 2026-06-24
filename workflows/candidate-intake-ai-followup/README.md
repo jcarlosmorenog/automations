@@ -6,7 +6,11 @@ A practical n8n proof artifact for staffing and recruiting teams.
 
 ## Demo
 
-▶ [Watch the walkthrough](./media/n8n.mp4) — a run through the workflow in n8n (opens in your browser).
+
+
+https://github.com/user-attachments/assets/0c7918fb-7edc-4f6f-98ea-17e7514fbe1b
+
+
 
 ## Files in this folder
 
