@@ -1,0 +1,10 @@
+{
+  "name": "Jordan Rivera",
+  "email": "jordan.rivera@example.com",
+  "phone": "+1 555 0142",
+  "role": "Senior Backend Engineer",
+  "experience_years": "7",
+  "skills": "Node.js, PostgreSQL, AWS, Docker, REST APIs",
+  "linkedin_url": "https://www.linkedin.com/in/jordan-rivera-example",
+  "cover_note": "I'm looking for a remote-first team where I can own backend architecture and mentor junior engineers. Available to start in 4 weeks."
+}

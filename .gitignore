@@ -1,0 +1,36 @@
+# --- Secrets / credentials (never commit) ---
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+service-account*.json
+**/secrets/
+
+# --- n8n local data ---
+.n8n/
+*.sqlite
+
+# --- OS cruft ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.swp
+*~
+
+# --- Media source / large intermediates (keep exported mp4/png/gif tracked) ---
+*.mov
+*.avi
+*.mkv
+media/raw/
+media/**/*.aep
+media/**/*.prproj
+
+# --- Logs / temp ---
+*.log
+tmp/
+.tmp/

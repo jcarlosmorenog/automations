@@ -1,0 +1,374 @@
+{
+  "name": "Candidate Intake Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "candidate-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "84d7852b-10eb-4c5a-b53f-afc3eb5ebcfc",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.openai_request) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "7c1bde2b-2075-4bb2-bddb-de35a1a8ccf4",
+      "name": "LLM Call",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_OPENAI_HEADER_AUTH_CREDENTIAL_ID",
+          "name": "OpenAI Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Support both direct body and nested body (n8n versions differ)\nconst raw = $input.first().json;\nconst body = raw.body || raw;\n\nconst candidate = {\n  candidate_name:    (body.name || '').trim(),\n  candidate_email:   (body.email || '').trim().toLowerCase(),\n  candidate_phone:   (body.phone || '').trim(),\n  role_applied:      (body.role || '').trim(),\n  experience_years:  (body.experience_years || '').toString().trim(),\n  skills:            (body.skills || '').trim(),\n  linkedin_url:      (body.linkedin_url || '').trim(),\n  cover_note:        (body.cover_note || '').trim(),\n  submitted_at:      new Date().toISOString()\n};\n\nconst systemPrompt = `You are a senior recruiting assistant at a staffing agency.\nYour job is to evaluate candidates quickly and help recruiters act fast.\nAlways respond with a single valid JSON object — no markdown, no explanation.`;\n\nconst userPrompt = `Evaluate this job candidate and return a JSON object with exactly these fields:\n- fit_score: integer from 1 to 10 (10 = perfect match)\n- fit_reason: one sentence explaining the score\n- summary: 2-3 sentence professional summary of the candidate\n- email_subject: subject line for the follow-up email\n- email_body: 3-4 sentence follow-up email body (warm, professional, personalized — do NOT mention the fit score)\n\nCandidate details:\nName: ${candidate.candidate_name}\nEmail: ${candidate.candidate_email}\nRole Applied For: ${candidate.role_applied}\nYears of Experience: ${candidate.experience_years}\nSkills: ${candidate.skills}\nCover Note: ${candidate.cover_note}`;\n\nconst openai_request = {\n  model: 'gpt-4o-mini',\n  temperature: 0.3,\n  response_format: { type: 'json_object' },\n  messages: [\n    { role: 'system', content: systemPrompt },\n    { role: 'user',   content: userPrompt }\n  ]\n};\n\nreturn [{ json: { ...candidate, openai_request } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "edbaf429-88a1-4805-8edd-1abfc4421ab4",
+      "name": "Parse & Context"
+    },
+    {
+      "parameters": {
+        "jsCode": "const openaiResponse = $input.first().json;\n\n// Extract the message content from OpenAI's response\nlet content;\ntry {\n  content = openaiResponse.choices[0].message.content;\n} catch (e) {\n  throw new Error('Unexpected OpenAI response shape: ' + JSON.stringify(openaiResponse));\n}\n\n// Parse the AI's JSON string into a real object\nlet ai;\ntry {\n  ai = JSON.parse(content);\n} catch (e) {\n  throw new Error('AI response was not valid JSON: ' + content);\n}\n\n// Pull the candidate data back from the earlier node by name\nconst candidate = $('Parse & Context').first().json;\n\n// Merge everything into one flat object for the downstream nodes\nreturn [{\n  json: {\n    submitted_at:      candidate.submitted_at,\n    candidate_name:    candidate.candidate_name,\n    candidate_email:   candidate.candidate_email,\n    candidate_phone:   candidate.candidate_phone,\n    role_applied:      candidate.role_applied,\n    experience_years:  candidate.experience_years,\n    skills:            candidate.skills,\n    linkedin_url:      candidate.linkedin_url,\n    cover_note:        candidate.cover_note,\n    fit_score:         ai.fit_score     || 0,\n    fit_reason:        ai.fit_reason    || '',\n    ai_summary:        ai.summary       || '',\n    email_subject:     ai.email_subject || 'Thank you for applying',\n    email_body:        ai.email_body    || '',\n    status:            'New',\n    ai_processed_at:   new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "7a0b36a4-017a-4334-b018-bfd4080c1428",
+      "name": "Humanize"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_DOCUMENT_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Submitted At": "={{ $json.submitted_at }}",
+            "Name": "={{ $json.candidate_name }}",
+            "Email": "={{ $json.candidate_email }}",
+            "Phone": "={{ $json.candidate_phone }}",
+            "Role Applied": "={{ $json.role_applied }}",
+            "Experience (Yrs)": "={{ $json.experience_years }}",
+            "Skills": "={{ $json.skills }}",
+            "LinkedIn": "={{ $json.linkedin_url }}",
+            "Cover Note": "={{ $json.cover_note }}",
+            "Fit Score": "={{ $json.fit_score }}",
+            "Fit Reason": "={{ $json.fit_reason }}",
+            "AI Summary": "={{ $json.ai_summary }}",
+            "Status": "={{ $json.status }}",
+            "AI Processed At": "={{ $json.ai_processed_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Submitted At",
+              "displayName": "Submitted At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Role Applied",
+              "displayName": "Role Applied",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience (Yrs)",
+              "displayName": "Experience (Yrs)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Skills",
+              "displayName": "Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn",
+              "displayName": "LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cover Note",
+              "displayName": "Cover Note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fit Score",
+              "displayName": "Fit Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fit Reason",
+              "displayName": "Fit Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Processed At",
+              "displayName": "AI Processed At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        816,
+        0
+      ],
+      "id": "e415b717-6805-48a1-ad65-22975c7951b9",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "REPLACE_WITH_GOOGLE_SERVICE_ACCOUNT_CREDENTIAL_ID",
+          "name": "Google Service Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "REPLACE_WITH_SENDER_EMAIL",
+        "toEmail": "={{ $('Humanize').item.json.candidate_email }}",
+        "subject": "={{ $('Humanize').item.json.email_subject }}",
+        "emailFormat": "text",
+        "text": "={{ $('Humanize').item.json.email_body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "183c2093-e694-4206-a98f-850beb6d40d2",
+      "name": "Send an Email",
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, candidate: $('Humanize').item.json.candidate_name, fit_score: $('Humanize').item.json.fit_score }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "e9748fce-1ede-4d33-b767-329d868c9115",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse & Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Call": {
+      "main": [
+        [
+          {
+            "node": "Humanize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Context": {
+      "main": [
+        [
+          {
+            "node": "LLM Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Humanize": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
