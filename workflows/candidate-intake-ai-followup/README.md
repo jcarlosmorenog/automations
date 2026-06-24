@@ -1,4 +1,4 @@
-# Candidate Intake → AI Summary → Sheet Update → Follow-up Email
+# Candidate Intake - AI Summary - Sheet Update - Follow-up Email
 
 A practical n8n proof artifact for staffing and recruiting teams.
 
