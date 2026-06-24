@@ -1,6 +1,6 @@
 # n8n Workflows for Day-to-Day Stuff
 
-A growing collection of practical, importable [n8n](https://n8n.io) workflows that automate the small, repetitive tasks that quietly eat up a workday. Each one is self-contained: a clear README, the importable JSON (with all credentials and secrets stripped), example payloads, and supporting media — ready to drop into your own n8n instance and run.
+A growing collection of practical, importable [n8n](https://n8n.io) workflows that automate the small, repetitive tasks that quietly eat up a workday. Each one is self-contained: a clear README, the importable JSON (with all credentials and secrets stripped), and example payloads — ready to drop into your own n8n instance and run.
 
 ## Why this exists
 
@@ -23,7 +23,6 @@ workflows/
     <workflow-name>.n8n.json      # importable workflow (no secrets)
     payloads/                     # example request bodies for testing
     schema/                       # supporting schemas (e.g. sheet headers)
-    media/                        # screenshots and walkthrough videos
 ```
 
 ## How to use any workflow

@@ -19,7 +19,6 @@ https://github.com/user-attachments/assets/0c7918fb-7edc-4f6f-98ea-17e7514fbe1b
 | `candidate-intake-ai-followup.n8n.json` | The importable n8n workflow (credentials and IDs removed). |
 | `payloads/sample-candidate-payload.json` | Example webhook request body for testing. |
 | `schema/google-sheets-schema.csv` | Header row for the destination Google Sheet. |
-| `media/` | Screenshots and walkthrough video. |
 
 ## What this workflow proves
 
