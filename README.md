@@ -1,10 +1,10 @@
-# n8n Automation Portfolio
+# n8n Workflows for Day-to-Day Stuff
 
-Real, importable [n8n](https://n8n.io) workflows that automate repetitive business operations — built to show, not just tell. Each workflow is self-contained: a clear README, the importable JSON (with all credentials and secrets stripped), example payloads, and supporting media.
+A growing collection of practical, importable [n8n](https://n8n.io) workflows that automate the small, repetitive tasks that quietly eat up a workday. Each one is self-contained: a clear README, the importable JSON (with all credentials and secrets stripped), example payloads, and supporting media — ready to drop into your own n8n instance and run.
 
 ## Why this exists
 
-Most small teams lose hours every week moving data between forms, email, spreadsheets, and CRM/ATS tools by hand. These workflows replace that manual copy-paste with reliable, AI-assisted automation. This repo is a working portfolio of those builds — every one can be imported into a fresh n8n instance and run.
+So much daily work is just moving the same data between a form, an email, a spreadsheet, and the next tool — by hand, over and over. These workflows take those chores off your plate: capture something once, let automation (and a bit of AI where it helps) do the routing, summarizing, logging, and follow-up. Nothing here is a toy demo — every workflow is a real, working build you can import and use today.
 
 ## Workflows
 
@@ -39,6 +39,6 @@ Every shared workflow JSON has its credentials, API keys, document IDs, and pers
 
 ## Contact
 
-Have a manual workflow you'd like automated? Send it over and I'll suggest one automation to start with.
+Got a repetitive task you'd love to stop doing by hand? Tell me about it and I'll suggest one automation to start with.
 
 - 📧 morenocarlos9973@gmail.com
